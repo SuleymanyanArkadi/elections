@@ -1,0 +1,50 @@
+{
+	"name": "elections",
+	"license": "MIT",
+	"scripts": {
+		"compile": "npm run prettier:solidity && npx hardhat compile",
+		"test": "npm run eslint:fix && IS_TEST_DEPLOY=true npx hardhat test",
+		"coverage": "IS_TEST_DEPLOY=true npx hardhat coverage",
+		"deploy": "npm run eslint:fix && npx hardhat deploy",
+		"verify:goerli": "npx hardhat etherscan-verify --network goerli --solc-input",
+		"deploy:goerli": "IS_TEST_DEPLOY=false npx hardhat deploy --network goerli",
+		"verify:mainnet": "npx hardhat etherscan-verify --network mainnet --solc-input",
+		"node": "npx hardhat node --no-deploy",
+		"eslint": "npx eslint deploy/**/*.js test/**/*.js",
+		"eslint:fix": "npx eslint --fix deploy/**/*.js test/**/*.js",
+		"solhint": "solhint contracts/*.sol",
+		"size-contracts": "npx hardhat size-contracts",
+		"prettier:solidity": "./node_modules/.bin/prettier --write 'contracts/**/*.sol'",
+		"slither": "HARDHAT_DEPENDENCY_COMPILER_KEEP=true slither . && rm -rf contracts/hardhat-dependency-compiler"
+	},
+	"devDependencies": {
+		"@atixlabs/hardhat-time-n-mine": "^0.0.5",
+		"@nomiclabs/hardhat-ethers": "^2.0.2",
+		"@nomiclabs/hardhat-etherscan": "^3.1.0",
+		"@nomiclabs/hardhat-solhint": "^2.0.0",
+		"@nomiclabs/hardhat-waffle": "^2.0.1",
+		"@nomiclabs/hardhat-web3": "^2.0.0",
+		"@openzeppelin/contracts": "^4.3.1",
+		"@openzeppelin/test-helpers": "^0.5.15",
+		"chai": "^4.3.4",
+		"dotenv": "^10.0.0",
+		"eslint": "^7.32.0",
+		"eslint-config-prettier": "^8.3.0",
+		"eslint-config-standard": "^16.0.3",
+		"eslint-plugin-mocha": "^9.0.0",
+		"eslint-plugin-prettier": "^3.4.1",
+		"ethereum-waffle": "^3.4.0",
+		"ethers": "^5.4.6",
+		"hardhat": "^2.6.4",
+		"hardhat-contract-sizer": "^2.0.3",
+		"hardhat-deploy": "^0.9.28",
+		"hardhat-deploy-ethers": "^0.3.0-beta.13",
+		"hardhat-tracer": "*",
+		"prettier": "^2.4.1",
+		"solhint": "^3.3.6",
+		"solidity-coverage": "^0.7.17"
+	},
+	"dependencies": {
+		"hardhat-local-networks-config-plugin": "^0.0.6"
+	}
+}

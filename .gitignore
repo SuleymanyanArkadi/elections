@@ -1,0 +1,18 @@
+node_modules
+package-lock.json
+.env
+.vscode
+
+#Hardhat files
+contracts/hardhat-dependency-compiler
+coverage.json
+coverage
+deployments/localhost
+deployments/hardhat
+deployments/goerli
+bin
+cache
+artifacts
+typechain
+docgen
+network.json

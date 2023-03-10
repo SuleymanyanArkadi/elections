@@ -1,0 +1,5 @@
+{
+    "detectors_to_exclude": "incorrect-equality",
+    "filter_paths": "node_modules/@openzeppelin|contracts/hardhat-dependency-compiler",
+    "solc_remaps": "@openzeppelin/=$(pwd)/node_modules/@openzeppelin/ @uniswap/=$(pwd)/node_modules/@uniswap/"
+} 
