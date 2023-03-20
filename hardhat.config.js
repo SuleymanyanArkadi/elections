@@ -52,13 +52,13 @@ module.exports = {
 		deployer: {
 			default: 0
 		},
-		playerOne: {
+		voter1: {
 			default: 1
 		},
-		playerTwo: {
+		voter2: {
 			default: 2
 		},
-		playerThree: {
+		voter3: {
 			default: 3
 		}
 	},
