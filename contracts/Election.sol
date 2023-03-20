@@ -107,7 +107,7 @@ contract Election is AccessControl {
     function vote(
         bytes32 votingName_,
         bytes32 voteFor_
-    ) public votingExist(votingName_) verifyVoter(votingName_, msg.sender) optionExist(votingName_, voteFor_) {
+    ) external votingExist(votingName_) verifyVoter(votingName_, msg.sender) optionExist(votingName_, voteFor_) {
         VotingData storage voting = votings[votingName_];
         require(voting.endTime >= block.timestamp);
 
@@ -122,6 +122,26 @@ contract Election is AccessControl {
 
         for (uint256 i = 0; i < voting.options.length; i++) {
             results[i] = voting.votesReceived[voting.options[i]];
+        }
+    }
+
+    function getWinners(bytes32 votingName_) external view returns (bytes32[] memory winners) {
+        VotingData storage voting = votings[votingName_];
+
+        uint256 maxVotes = voting.votesReceived[voting.options[0]];
+
+        for (uint256 i = 1; i < voting.options.length; i++) {
+            if (maxVotes < voting.votesReceived[voting.options[i]]) {
+                maxVotes = voting.votesReceived[voting.options[i]];
+            }
+        }
+
+        uint256 winnersCount;
+        for (uint256 i = 0; i < voting.options.length; i++) {
+            if (maxVotes == voting.votesReceived[voting.options[i]]) {
+                winners[winnersCount] = voting.options[i];
+                winnersCount++;
+            }
         }
     }
 }
