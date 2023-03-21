@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.7;
+pragma solidity 0.8.19;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "hardhat/console.sol";
 
 contract Election is AccessControl {
     enum VoterGroup {
@@ -33,7 +34,7 @@ contract Election is AccessControl {
     event VoterAdded(address indexed voter, VoterGroup indexed group);
     event VoterModified(address indexed voter, VoterGroup indexed group);
     event VoterRemoved(address indexed voter);
-    event VotingCreated(bytes32 indexed votingName);
+    event VotingCreated(bytes32 indexed votingName, VoterGroup indexed group, uint256 indexed endTime);
     event VoteCasted(address indexed voter, bytes32 indexed votingName, bytes32 indexed option);
 
     modifier votingExist(bytes32 name) {
@@ -45,16 +46,17 @@ contract Election is AccessControl {
         require(voters[voter].whitelisted, "Voter does not exist");
         require(votings[name].group == voters[voter].group || votings[name].group == VoterGroup.All);
         require(votings[name].voted[voter] == false, "Voter already voted");
-
         _;
     }
 
     modifier optionExist(bytes32 name, bytes32 option) {
         bytes32[] memory options = votings[name].options;
+        bool isMatch;
         for (uint256 i = 0; i < options.length; i++) {
-            if (options[i] == option) _;
+            if (options[i] == option) isMatch = true;
         }
-        revert("Option does not exist");
+        require(isMatch, "Option does not exist");
+        _;
     }
 
     constructor(address admin_) {
@@ -101,7 +103,7 @@ contract Election is AccessControl {
         voting.options = options_;
         voting.description = description_;
 
-        emit VotingCreated(name_);
+        emit VotingCreated(name_, group_, block.timestamp + duration_);
     }
 
     function vote(
@@ -117,31 +119,32 @@ contract Election is AccessControl {
         emit VoteCasted(msg.sender, votingName_, voteFor_);
     }
 
-    function getResults(bytes32 votingName_) external view returns (uint256[] memory results) {
+    function getOptions(bytes32 votingName_) external view returns (bytes32[] memory) {
+        return votings[votingName_].options;
+    }
+
+    function getResults(bytes32 votingName_) external view returns (uint256[] memory) {
         VotingData storage voting = votings[votingName_];
 
+        uint256[] memory results = new uint256[](voting.options.length);
         for (uint256 i = 0; i < voting.options.length; i++) {
             results[i] = voting.votesReceived[voting.options[i]];
         }
+        return results;
     }
 
-    function getWinners(bytes32 votingName_) external view returns (bytes32[] memory winners) {
+    function getWinner(bytes32 votingName_) external view returns (bytes32 winner) {
         VotingData storage voting = votings[votingName_];
 
-        uint256 maxVotes = voting.votesReceived[voting.options[0]];
-
-        for (uint256 i = 1; i < voting.options.length; i++) {
-            if (maxVotes < voting.votesReceived[voting.options[i]]) {
-                maxVotes = voting.votesReceived[voting.options[i]];
-            }
-        }
-
-        uint256 winnersCount;
+        uint256 maxVotes;
         for (uint256 i = 0; i < voting.options.length; i++) {
-            if (maxVotes == voting.votesReceived[voting.options[i]]) {
-                winners[winnersCount] = voting.options[i];
-                winnersCount++;
+            if (maxVotes < voting.votesReceived[voting.options[i]]) {
+                winner = voting.options[i];
             }
         }
+    }
+
+    function isVoted(bytes32 votingName_, address voter_) external view returns (bool) {
+        return votings[votingName_].voted[voter_];
     }
 }
