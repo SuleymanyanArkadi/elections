@@ -22,7 +22,7 @@ module.exports = {
 				url: `https://bsc.getblock.io/mainnet/?api_key=${process.env.FORKING_API_KEY}`
 			},
 			accounts: {
-				mnemonic: "hen hair couple rose hover crush math mango private apology bid antique",
+				mnemonic: process.env.TESTNET_MNEMONIC,
 				path: "m/44'/60'/0'/0",
 				initialIndex: "0",
 				count: "20"
@@ -48,7 +48,7 @@ module.exports = {
 		goerli: {
 			chainId: 5,
 			accounts: {
-				mnemonic: "hen hair couple rose hover crush math mango private apology bid antique",
+				mnemonic: process.env.TESTNET_MNEMONIC,
 				path: "m/44'/60'/0'/0",
 				initialIndex: 0,
 				count: 20

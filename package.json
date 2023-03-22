@@ -7,7 +7,7 @@
 		"coverage": "IS_TEST_DEPLOY=true npx hardhat coverage",
 		"deploy": "npm run eslint:fix && npx hardhat deploy",
 		"verify:goerli": "npx hardhat etherscan-verify --network goerli --solc-input",
-		"deploy:goerli": "IS_TEST_DEPLOY=false npx hardhat deploy --network goerli",
+		"deploy:goerli": "npx hardhat deploy --network goerli",
 		"verify:mainnet": "npx hardhat etherscan-verify --network mainnet --solc-input",
 		"node": "npx hardhat node --no-deploy",
 		"eslint": "npx eslint deploy/**/*.js test/**/*.js",
