@@ -10,15 +10,16 @@ const {
 	},
 	deployments: { fixture, createFixture },
 } = require("hardhat");
-// const {
-// 	time: { advanceBlockTo, increaseTo },
-// } = require("@openzeppelin/test-helpers");
+const {
+	time: { increase },
+} = require("@openzeppelin/test-helpers");
 
 describe("Election", function () {
-	let deployer, voter1; /* voter2, voter3 */
+	let deployer, voter1, voter2, voter3;
 	let election, adminRole;
 	const VoterGroup = { All: 0, Group1: 1, Group2: 2, Group3: 3 };
 	const testVotingName = formatBytes32String("Test");
+
 	const createVoting = async ({
 		caller = deployer,
 		name = "Test",
@@ -46,7 +47,7 @@ describe("Election", function () {
 	});
 
 	before("Before All: ", async function () {
-		({ deployer, voter1 /* , voter2, voter3 */ } = await getNamedSigners());
+		({ deployer, voter1, voter2, voter3 } = await getNamedSigners());
 	});
 
 	beforeEach(async function () {
@@ -185,10 +186,12 @@ describe("Election", function () {
 	});
 
 	describe("vote: ", function () {
-		it("Should vote and emit 'VoteCasted'", async function () {
+		beforeEach(async function () {
 			await election.addVoter(voter1.address, VoterGroup.Group1);
-			await createVoting({});
+			await createVoting({ group: VoterGroup.Group1 });
+		});
 
+		it("Should vote and emit 'VoteCasted'", async function () {
 			const tx = await election.connect(voter1).vote(testVotingName, formatBytes32String("Candidate 1"));
 			const results = await election.getResults(testVotingName);
 
@@ -202,20 +205,40 @@ describe("Election", function () {
 			expect(events[0].args.option).to.equal(formatBytes32String("Candidate 1"));
 		});
 
-		xit("Should revert if the voting with same name already created", async function () {
-			await createVoting({});
+		it("Should vote 3 voters", async function () {
+			await election.addVoter(voter2.address, VoterGroup.Group1);
+			await election.addVoter(voter3.address, VoterGroup.Group1);
 
-			await expect(createVoting({})).to.be.revertedWith("Voting topic already exists");
+			await election.connect(voter1).vote(testVotingName, formatBytes32String("Candidate 1"));
+			await election.connect(voter2).vote(testVotingName, formatBytes32String("Candidate 2"));
+			await election.connect(voter3).vote(testVotingName, formatBytes32String("Candidate 1"));
+			const results = await election.getResults(testVotingName);
+
+			expect(results).to.eql([2, 1, 0].map((result) => BigNumber.from(result)));
+			expect(await election.getWinner(testVotingName)).to.equal(formatBytes32String("Candidate 1"));
 		});
 
-		xit("Should revert if not enough options", async function () {
-			await expect(createVoting({ options: ["1 option"] })).to.be.revertedWith("At least two option is required");
+		it("Should revert if the voting does not exist", async function () {
+			await expect(election.connect(voter1).vote(formatBytes32String("Test_Non_Exist"), formatBytes32String("Candidate 1"))).to.be.revertedWith("Voting does not exist");
 		});
 
-		xit("Should revert if the caller is not an admin", async function () {
-			const errorMsg = `AccessControl: account ${voter1.address.toLowerCase()} is missing role ${adminRole}`;
+		it("Should revert if the voter is not allowed to vote", async function () {
+			await expect(election.connect(voter2).vote(testVotingName, formatBytes32String("Candidate 1"))).to.be.revertedWith("Voter does not whitelisted");
 
-			await expect(createVoting({ caller: voter1 })).to.be.revertedWith(errorMsg);
+			await election.addVoter(voter2.address, VoterGroup.Group2);
+			await expect(election.connect(voter2).vote(testVotingName, formatBytes32String("Candidate 1"))).to.be.revertedWith("Voter group does not match");
+
+			await election.connect(voter1).vote(testVotingName, formatBytes32String("Candidate 1"));
+			await expect(election.connect(voter1).vote(testVotingName, formatBytes32String("Candidate 1"))).to.be.revertedWith("Voter already voted");
+		});
+
+		it("Should revert if the option does not exist", async function () {
+			await expect(election.connect(voter1).vote(testVotingName, formatBytes32String("Candidate 4"))).to.be.revertedWith("Option does not exist");
+		});
+
+		it("Should revert if the voting time is passed", async function () {
+			await increase(300);
+			await expect(election.connect(voter1).vote(testVotingName, formatBytes32String("Candidate 3"))).to.be.revertedWith("Voting was over");
 		});
 	});
 	// ...

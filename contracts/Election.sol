@@ -2,9 +2,7 @@
 
 pragma solidity 0.8.19;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "hardhat/console.sol";
+import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract Election is AccessControl {
     enum VoterGroup {
@@ -43,8 +41,11 @@ contract Election is AccessControl {
     }
 
     modifier verifyVoter(bytes32 name, address voter) {
-        require(voters[voter].whitelisted, "Voter does not exist");
-        require(votings[name].group == voters[voter].group || votings[name].group == VoterGroup.All);
+        require(voters[voter].whitelisted, "Voter does not whitelisted");
+        require(
+            votings[name].group == voters[voter].group || votings[name].group == VoterGroup.All,
+            "Voter group does not match"
+        );
         require(votings[name].voted[voter] == false, "Voter already voted");
         _;
     }
@@ -111,7 +112,7 @@ contract Election is AccessControl {
         bytes32 voteFor_
     ) external votingExist(votingName_) verifyVoter(votingName_, msg.sender) optionExist(votingName_, voteFor_) {
         VotingData storage voting = votings[votingName_];
-        require(voting.endTime >= block.timestamp);
+        require(voting.endTime >= block.timestamp, "Voting was over");
 
         voting.votesReceived[voteFor_] += 1;
         voting.voted[msg.sender] = true;
@@ -139,6 +140,7 @@ contract Election is AccessControl {
         uint256 maxVotes;
         for (uint256 i = 0; i < voting.options.length; i++) {
             if (maxVotes < voting.votesReceived[voting.options[i]]) {
+                maxVotes = voting.votesReceived[voting.options[i]];
                 winner = voting.options[i];
             }
         }
