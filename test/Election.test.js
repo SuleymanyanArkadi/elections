@@ -153,6 +153,7 @@ describe("Election", function () {
 			const time = (await provider.getBlock(tx.blockNumber)).timestamp;
 			const options = await election.getOptions(testVotingName);
 			const voting = await election.votings(testVotingName);
+			const votingNames = await election.getVotingNames();
 
 			expect(voting.description).to.equal(formatBytes32String("Test voting"));
 			expect(voting.endTime).to.equal(BigNumber.from(time + 120));
@@ -160,6 +161,8 @@ describe("Election", function () {
 			expect(options).to.eql(
 				["Candidate 1", "Candidate 2", "Candidate 3"].map((option) => formatBytes32String(option))
 			);
+
+			expect(votingNames[0]).to.equal(testVotingName);
 
 			const events = await election.queryFilter("VotingCreated", tx.blockNumber);
 			expect(events.length).to.equal(1);

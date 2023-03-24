@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.19;
 
-import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract Election is AccessControl {
     enum VoterGroup {
@@ -26,6 +26,7 @@ contract Election is AccessControl {
         uint256 endTime;
     }
 
+    bytes32[] public votingNames;
     mapping(address => Voter) public voters;
     mapping(bytes32 => VotingData) public votings;
 
@@ -104,6 +105,8 @@ contract Election is AccessControl {
         voting.options = options_;
         voting.description = description_;
 
+        votingNames.push(name_);
+
         emit VotingCreated(name_, group_, block.timestamp + duration_);
     }
 
@@ -118,6 +121,10 @@ contract Election is AccessControl {
         voting.voted[msg.sender] = true;
 
         emit VoteCasted(msg.sender, votingName_, voteFor_);
+    }
+
+    function getVotingNames() external view returns (bytes32[] memory) {
+        return votingNames;
     }
 
     function getOptions(bytes32 votingName_) external view returns (bytes32[] memory) {
