@@ -54,7 +54,19 @@ module.exports = {
 				count: 20
 			},
 			url: `https://eth-goerli.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
-			tags: ["testnet"],
+			tags: ["goerli"],
+			deploy: ["./deploy/testnet"]
+		},
+		sepolia: {
+			chainId: 11155111,
+			accounts: {
+				mnemonic: process.env.TESTNET_MNEMONIC,
+				path: "m/44'/60'/0'/0",
+				initialIndex: 0,
+				count: 20
+			},
+			url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+			tags: ["sepolia"],
 			deploy: ["./deploy/testnet"]
 		}
 	},

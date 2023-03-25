@@ -7,9 +7,7 @@ package-lock.json
 contracts/hardhat-dependency-compiler
 coverage.json
 coverage
-deployments/localhost
-deployments/hardhat
-deployments/goerli
+deployments
 bin
 cache
 artifacts

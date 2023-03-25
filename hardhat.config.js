@@ -87,7 +87,8 @@ module.exports = {
 		showTimeSpent: true
 	},
 	etherscan: {
-		apiKey: ETHERSCAN_API_KEY
+		apiKey: ETHERSCAN_API_KEY,
+		customChains: [],
 	},
 	typechain: {
 		outDir: "typechain",
